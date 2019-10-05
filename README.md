@@ -34,14 +34,12 @@ When airflow has been properly installed you will need to initialize the airflow
 
 ***airflow initdb***
 
-### Copy the project template files to your local Airflow directory
-Download and unzip the project files from Udacity and move the resulting dags and plugins directory to your local _~/airflow_ folder (Airflow will create a _~/airflow_ folder during installation).
-
-In the repository you will also find a script called _start\_airflow.sh_. The script is a slightly modified version of the _start.sh_ script used by Udacity in their Data Pipeline Airflow Exercise VMs. To start Airflow on your local computer: run this script:
+### Start Airflow
+In the repository you will find a script called _start\_airflow.sh_. The script is a slightly modified version of the _start.sh_ script used by Udacity in their Data Pipeline Airflow Exercise VMs. To start Airflow on your local computer: run this script:
 
 ***./start_airflow.sh***
 
-It will start the Airflow webserver listening on port 80 on your local machine (change the port number if you want by setting another port in the start_airfloe.sh script). In a browser window, go to http://localhost, this should bring up the Airflow web based GUI.
+It will start the Airflow webserver listening on port 80 on your local machine (change the port number if you want by setting another port in the *start_airflow.sh* script). In a browser window, go to http://localhost, this should bring up the Airflow web based GUI.
 
 ## <a name="run"></a>How to run the Airflow scripts
 In this project, the Airflow DAG will use a Redshit cluster. It is therefore necessary to properly setup a Redshift cluster first. When the cluster is up and running the code in this repo should be copied to the Airflow home directory (usually _~/airflow_). When that is done you can finally run the Airflow DAG. Details for all these steps are described in the next subsections.
