@@ -4,9 +4,10 @@ from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators import (StageToRedshiftOperator, LoadFactOperator,
                                 LoadDimensionOperator, DataQualityOperator)
+
 from helpers import SparkifySqlQueries
 
-debug = True
+debug = False
 
 default_args = {
     'owner': 'arneme',
@@ -21,6 +22,7 @@ dag = DAG('Sparkify-Data-Pipeline',
           default_args=default_args,
           description='Load and transform data in Redshift with Airflow',
           schedule_interval='0 * * * *',
+          #schedule_interval=None,
           catchup=False
         )
 
@@ -84,6 +86,10 @@ load_time_dimension_table = LoadDimensionOperator(
 
 run_quality_checks = DataQualityOperator(
     task_id='Run_data_quality_checks',
+    redshift_conn_id='redshift',
+    sparkify_tables=SparkifySqlQueries.sparkify_tables,
+    sqls = SparkifySqlQueries.sql_count,
+    debug=debug,
     dag=dag
 )
 

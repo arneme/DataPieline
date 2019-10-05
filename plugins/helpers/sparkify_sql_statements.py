@@ -1,4 +1,9 @@
+from airflow.contrib.hooks.aws_hook import AwsHook
+
 class SparkifySqlQueries:
+  
+  aws_hook = AwsHook("aws_credentials")
+  credentials = aws_hook.get_credentials()
 
   # Config params
   IAM_ROLE='ARN=arn:aws:iam::704899994853:role/myRedshiftRole'
@@ -123,15 +128,27 @@ class SparkifySqlQueries:
 
   # STAGING TABLES
 
+  # staging_events_copy = ("""
+  # COPY staging_events FROM '{}' credentials 'aws_iam_role={}' format as json '{}'
+  #   STATUPDATE ON region 'us-west-2';
+  # """).format(LOG_DATA, IAM_ROLE, LOG_JSONPATH)
+
+  # staging_songs_copy = ("""
+  #   COPY staging_songs FROM '{}' credentials 'aws_iam_role={}' format as json 'auto'
+  #   ACCEPTINVCHARS STATUPDATE ON region 'us-west-2';
+  # """).format(SONG_DATA, IAM_ROLE)
+
   staging_events_copy = ("""
-  COPY staging_events FROM {} credentials 'aws_iam_role={}' format as json {}
+  COPY staging_events FROM '{}' ACCESS_KEY_ID '{}'
+    SECRET_ACCESS_KEY '{}' format as json '{}'
     STATUPDATE ON region 'us-west-2';
-  """).format(LOG_DATA, IAM_ROLE, LOG_JSONPATH)
+  """).format(LOG_DATA, credentials.access_key, credentials.secret_key, LOG_JSONPATH)
 
   staging_songs_copy = ("""
-    COPY staging_songs FROM {} credentials 'aws_iam_role={}' format as json 'auto'
+    COPY staging_songs FROM '{}' ACCESS_KEY_ID '{}'
+    SECRET_ACCESS_KEY '{}' format as json 'auto'
     ACCEPTINVCHARS STATUPDATE ON region 'us-west-2';
-  """).format(SONG_DATA, IAM_ROLE)
+  """).format(SONG_DATA,credentials.access_key, credentials.secret_key)
 
   # insert statements
 
@@ -182,11 +199,24 @@ class SparkifySqlQueries:
   WHERE events.page = 'NextSong';
   """)
 
+  sql_count = ("""
+        SELECT COUNT(*) FROM {};
+    """)
+
   # QUERY LISTS used by Airflow
+  # Staging lists
+  staging_events_table_create_test = [staging_events_table_drop, staging_events_table_create]
   stage_event_sqls = [staging_events_table_drop, staging_events_table_create, staging_events_copy]
   stage_songs_sqls = [staging_songs_table_drop, staging_songs_table_create, staging_songs_copy]
+
+  # Fact table list
   load_fact_sqls = [songplay_table_drop, songplay_table_create, songplay_table_insert]
+
+  # Dimension tables lists
   load_user_dim_sqls = [user_table_drop, user_table_create, user_table_insert]
   load_song_dim_sqls = [song_table_drop, song_table_create, song_table_insert]
   load_artist_dim_sqls = [artist_table_drop, artist_table_create, artist_table_insert]
   load_time_dim_sqls = [time_table_drop, time_table_create, time_table_insert]
+
+  # Quality assurance lists
+  sparkify_tables = ["staging_events", "staging_songs", "songplay_table", "user_table", "song_table", "artist_table", "time_table"]
