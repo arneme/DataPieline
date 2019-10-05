@@ -1,5 +1,12 @@
 class SparkifySqlQueries:
 
+  # Config params
+  IAM_ROLE='ARN=arn:aws:iam::704899994853:role/myRedshiftRole'
+  LOG_DATA='s3://udacity-dend/log_data'
+  LOG_JSONPATH='s3://udacity-dend/log_json_path.json'
+  SONG_DATA='s3://udacity-dend/song_data'
+
+
   # DROP TABLES
 
   staging_events_table_drop = "DROP TABLE IF EXISTS staging_events"
@@ -54,7 +61,7 @@ class SparkifySqlQueries:
   );
   """)
 
-  # Create the dimension tables
+  # Create the fact table
 
   songplay_table_create = ("""
   CREATE TABLE IF NOT EXISTS songplay_table(
@@ -70,6 +77,7 @@ class SparkifySqlQueries:
   );
   """)
 
+  # Create the dimesion tables
 
   user_table_create = ("""
   CREATE TABLE IF NOT EXISTS user_table(
@@ -91,7 +99,6 @@ class SparkifySqlQueries:
   );
   """)
 
-  # The position is stated to be split into its elements (lat, long) but I will use POINT instead
   artist_table_create = ("""
   CREATE TABLE IF NOT EXISTS artist_table(
      artist_id VARCHAR NOT NULL SORTKEY,
@@ -102,7 +109,6 @@ class SparkifySqlQueries:
   );
   """)
 
-  # It is a bit strange to vaste space in the database to store hour, date, week, ... since it is implicit part of the TIMESTAMP and easily deducted from it. 
   time_table_create = ("""
   CREATE TABLE IF NOT EXISTS time_table(
      start_time TIMESTAMP NOT NULL SORTKEY,
@@ -120,14 +126,14 @@ class SparkifySqlQueries:
   staging_events_copy = ("""
   COPY staging_events FROM {} credentials 'aws_iam_role={}' format as json {}
     STATUPDATE ON region 'us-west-2';
-  """).format("use", "airflow", "configs")
+  """).format(LOG_DATA, IAM_ROLE, LOG_JSONPATH)
 
   staging_songs_copy = ("""
     COPY staging_songs FROM {} credentials 'aws_iam_role={}' format as json 'auto'
     ACCEPTINVCHARS STATUPDATE ON region 'us-west-2';
-  """).format("use", "airflow", "configs")
+  """).format(SONG_DATA, IAM_ROLE)
 
-  # FINAL TABLES
+  # insert statements
 
   songplay_table_insert = ("""
   INSERT INTO songplay_table (start_time, user_id, song_id, artist_id, level,
@@ -176,9 +182,11 @@ class SparkifySqlQueries:
   WHERE events.page = 'NextSong';
   """)
 
-  # QUERY LISTS
-
-  create_table_queries = [staging_events_table_create, staging_songs_table_create, songplay_table_create, user_table_create, song_table_create, artist_table_create, time_table_create]
-  drop_table_queries = [staging_events_table_drop, staging_songs_table_drop, songplay_table_drop, user_table_drop, song_table_drop, artist_table_drop, time_table_drop]
-  copy_table_queries = [staging_events_copy, staging_songs_copy]
-  insert_table_queries = [songplay_table_insert, user_table_insert, song_table_insert, artist_table_insert, time_table_insert]
+  # QUERY LISTS used by Airflow
+  stage_event_sqls = [staging_events_table_drop, staging_events_table_create, staging_events_copy]
+  stage_songs_sqls = [staging_songs_table_drop, staging_songs_table_create, staging_songs_copy]
+  load_fact_sqls = [songplay_table_drop, songplay_table_create, songplay_table_insert]
+  load_user_dim_sqls = [user_table_drop, user_table_create, user_table_insert]
+  load_song_dim_sqls = [song_table_drop, song_table_create, song_table_insert]
+  load_artist_dim_sqls = [artist_table_drop, artist_table_create, artist_table_insert]
+  load_time_dim_sqls = [time_table_drop, time_table_create, time_table_insert]
