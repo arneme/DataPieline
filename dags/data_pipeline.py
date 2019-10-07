@@ -10,7 +10,7 @@ from helpers import SparkifySqlQueries
 # Set debug to True if you want to debug the DAG. When debug=True, SQL
 # commands normally sent to the Redshift cluster will only be printed
 # in the logs (i.e. not executed on Redshift)
-debug = True
+debug = False
 
 default_args = {
     'owner': 'arneme',
