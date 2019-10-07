@@ -6,7 +6,6 @@ class SparkifySqlQueries:
   credentials = aws_hook.get_credentials()
 
   # Config params
-  IAM_ROLE='ARN=arn:aws:iam::704899994853:role/myRedshiftRole'
   LOG_DATA='s3://udacity-dend/log_data'
   LOG_JSONPATH='s3://udacity-dend/log_json_path.json'
   SONG_DATA='s3://udacity-dend/song_data'
