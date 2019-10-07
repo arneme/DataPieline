@@ -7,28 +7,32 @@ class LoadDimensionOperator(BaseOperator):
     ui_color = '#80BD9E'
 
     @apply_defaults
-    def __init__(self, redshift_conn_id="", debug=False, sqls=None, *args, **kwargs):
+    def __init__(self, redshift_conn_id="", debug=False, delete="", sqls=None, *args, **kwargs):
 
         super(LoadDimensionOperator, self).__init__(*args, **kwargs)
         self.redshift_conn_id = redshift_conn_id
         self.debug = debug
-        self.stage_event_sqls = sqls
+        self.delete_sql = delete
+        self.dim_sqls = sqls
 
 
     def execute(self, context):
 
         self.log.info('Starting LoadDimensionOperator, self.redshift_conn_id = '+ self.redshift_conn_id)
         
+        
         if not self.debug:
             redshift_hook = PostgresHook(self.redshift_conn_id)
-        
-        
-        if not self.debug:
-            for query in self.stage_event_sqls:
+            # Check to see if we 
+            if self.delete_sql != "":
+                redshift_hook.run(self.delete_sql)
+            for query in self.dim_sqls:
                 redshift_hook.run(query)
             
         else:
-            for query in self.stage_event_sqls:
+            if self.delete_sql != "":
+                self.log.info(self.delete_sql)
+            for query in self.dim_sqls:
                 self.log.info(f'redshift_hook.run({query})')
 
         

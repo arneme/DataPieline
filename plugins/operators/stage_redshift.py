@@ -9,11 +9,12 @@ class StageToRedshiftOperator(BaseOperator):
     ui_color = '#358140'
 
     @apply_defaults
-    def __init__(self, redshift_conn_id="", debug=False, sqls=None, *args, **kwargs):
+    def __init__(self, redshift_conn_id="", debug=False, delete="", sqls=None, *args, **kwargs):
 
         super(StageToRedshiftOperator, self).__init__(*args, **kwargs)
         self.redshift_conn_id = redshift_conn_id
         self.debug = debug
+        self.delete_sql = delete
         self.stage_event_sqls = sqls
 
 
@@ -26,15 +27,16 @@ class StageToRedshiftOperator(BaseOperator):
         
         if not self.debug:
             redshift_hook = PostgresHook(self.redshift_conn_id)
-        
-        
-        if not self.debug:
+            # Check to see if we 
+            if self.delete_sql != "":
+                redshift_hook.run(self.delete_sql)
             for query in self.stage_event_sqls:
                 redshift_hook.run(query)
             
         else:
+            if self.delete_sql != "":
+                self.log.info(self.delete_sql)
             for query in self.stage_event_sqls:
                 self.log.info(f'redshift_hook.run({query})')
-
         
         self.log.info('Leaving StageToRedshiftOperator...')

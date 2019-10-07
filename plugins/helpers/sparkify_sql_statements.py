@@ -11,17 +11,6 @@ class SparkifySqlQueries:
   LOG_JSONPATH='s3://udacity-dend/log_json_path.json'
   SONG_DATA='s3://udacity-dend/song_data'
 
-
-  # DROP TABLES
-
-  staging_events_table_drop = "DROP TABLE IF EXISTS staging_events"
-  staging_songs_table_drop = "DROP TABLE IF EXISTS staging_songs"
-  songplay_table_drop = "DROP TABLE IF EXISTS songplay_table"
-  user_table_drop = "DROP TABLE IF EXISTS user_table"
-  song_table_drop = "DROP TABLE IF EXISTS song_table"
-  artist_table_drop = "DROP TABLE IF EXISTS artist_table"
-  time_table_drop = "DROP TABLE IF EXISTS time_table"
-
   # CREATE TABLES
 
   # First, define the staging tables. These tables will just mirror the
@@ -203,20 +192,29 @@ class SparkifySqlQueries:
         SELECT COUNT(*) FROM {};
     """)
 
-  # QUERY LISTS used by Airflow
+  # Queries and query lists used by Airflow
+  # DROP TABLES queries
+  staging_events_table_drop = "DROP TABLE IF EXISTS staging_events"
+  staging_songs_table_drop = "DROP TABLE IF EXISTS staging_songs"
+  songplay_table_drop = "DROP TABLE IF EXISTS songplay_table"
+  user_table_drop = "DROP TABLE IF EXISTS user_table"
+  song_table_drop = "DROP TABLE IF EXISTS song_table"
+  artist_table_drop = "DROP TABLE IF EXISTS artist_table"
+  time_table_drop = "DROP TABLE IF EXISTS time_table"
+
   # Staging lists
-  staging_events_table_create_test = [staging_events_table_drop, staging_events_table_create]
-  stage_event_sqls = [staging_events_table_drop, staging_events_table_create, staging_events_copy]
-  stage_songs_sqls = [staging_songs_table_drop, staging_songs_table_create, staging_songs_copy]
+  staging_events_table_create_test = [staging_events_table_create]
+  stage_event_sqls = [staging_events_table_create, staging_events_copy]
+  stage_songs_sqls = [staging_songs_table_create, staging_songs_copy]
 
   # Fact table list
-  load_fact_sqls = [songplay_table_drop, songplay_table_create, songplay_table_insert]
+  load_fact_sqls = [songplay_table_create, songplay_table_insert]
 
   # Dimension tables lists
-  load_user_dim_sqls = [user_table_drop, user_table_create, user_table_insert]
-  load_song_dim_sqls = [song_table_drop, song_table_create, song_table_insert]
-  load_artist_dim_sqls = [artist_table_drop, artist_table_create, artist_table_insert]
-  load_time_dim_sqls = [time_table_drop, time_table_create, time_table_insert]
+  load_user_dim_sqls = [user_table_create, user_table_insert]
+  load_song_dim_sqls = [song_table_create, song_table_insert]
+  load_artist_dim_sqls = [artist_table_create, artist_table_insert]
+  load_time_dim_sqls = [time_table_create, time_table_insert]
 
   # Quality assurance lists
   sparkify_tables = ["staging_events", "staging_songs", "songplay_table", "user_table", "song_table", "artist_table", "time_table"]

@@ -7,12 +7,13 @@ class LoadFactOperator(BaseOperator):
     ui_color = '#F98866'
 
     @apply_defaults
-    def __init__(self, redshift_conn_id="", debug=False, sqls=None, *args, **kwargs):
+    def __init__(self, redshift_conn_id="", debug=False, delete="", sqls=None, *args, **kwargs):
 
         super(LoadFactOperator, self).__init__(*args, **kwargs)
         self.redshift_conn_id = redshift_conn_id
         self.debug = debug
-        self.stage_event_sqls = sqls
+        self.delete_sql = delete
+        self.fact_sqls = sqls
 
 
     def execute(self, context):
@@ -24,14 +25,16 @@ class LoadFactOperator(BaseOperator):
         
         if not self.debug:
             redshift_hook = PostgresHook(self.redshift_conn_id)
-        
-        
-        if not self.debug:
-            for query in self.stage_event_sqls:
+            # Check to see if we should delete table first
+            if self.delete_sql != "":
+                redshift_hook.run(self.delete_sql)
+            for query in self.fact_sqls:
                 redshift_hook.run(query)
             
         else:
-            for query in self.stage_event_sqls:
+            if self.delete_sql != "":
+                self.log.info(self.delete_sql)
+            for query in self.fact_sqls:
                 self.log.info(f'redshift_hook.run({query})')
 
         

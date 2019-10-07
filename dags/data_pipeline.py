@@ -7,7 +7,10 @@ from airflow.operators import (StageToRedshiftOperator, LoadFactOperator,
 
 from helpers import SparkifySqlQueries
 
-debug = False
+# Set debug to True if you want to debug the DAG. When debug=True, SQL
+# commands normally sent to the Redshift cluster will only be printed
+# in the logs (i.e. not executed on Redshift)
+debug = True
 
 default_args = {
     'owner': 'arneme',
@@ -33,6 +36,8 @@ stage_events_to_redshift = StageToRedshiftOperator(
     redshift_conn_id='redshift',
     sqls = SparkifySqlQueries.stage_event_sqls,
     debug=debug,
+    # Omit delete parameter if you do not want to drop the table first
+    delete=SparkifySqlQueries.staging_events_table_drop,
     dag=dag
 )
 
@@ -41,6 +46,8 @@ stage_songs_to_redshift = StageToRedshiftOperator(
     redshift_conn_id='redshift',
     sqls = SparkifySqlQueries.stage_songs_sqls,
     debug=debug,
+    # Omit delete parameter if you do not want to drop the table first
+    delete=SparkifySqlQueries.staging_songs_table_drop,
     dag=dag
 )
 
@@ -49,6 +56,8 @@ load_songplays_table = LoadFactOperator(
     redshift_conn_id='redshift',
     sqls = SparkifySqlQueries.load_fact_sqls,
     debug=debug,
+    # Omit delete parameter if you do not want to drop the table first
+    delete=SparkifySqlQueries.songplay_table_drop,
     dag=dag
 )
 
@@ -57,6 +66,8 @@ load_user_dimension_table = LoadDimensionOperator(
     redshift_conn_id='redshift',
     sqls = SparkifySqlQueries.load_user_dim_sqls,
     debug=debug,
+    # Omit delete parameter if you do not want to drop the table first
+    delete=SparkifySqlQueries.user_table_drop,
     dag=dag
 )
 
@@ -65,6 +76,8 @@ load_song_dimension_table = LoadDimensionOperator(
     redshift_conn_id='redshift',
     sqls = SparkifySqlQueries.load_song_dim_sqls,
     debug=debug,
+    # Set delete to "" if you do not want to drop the table first
+    delete=SparkifySqlQueries.song_table_drop,
     dag=dag
 )
 
@@ -73,6 +86,8 @@ load_artist_dimension_table = LoadDimensionOperator(
     redshift_conn_id='redshift',
     sqls = SparkifySqlQueries.load_artist_dim_sqls,
     debug=debug,
+    # Set delete to "" if you do not want to drop the table first
+    delete=SparkifySqlQueries.artist_table_drop,
     dag=dag
 )
 
@@ -81,6 +96,8 @@ load_time_dimension_table = LoadDimensionOperator(
     redshift_conn_id='redshift',
     sqls = SparkifySqlQueries.load_time_dim_sqls,
     debug=debug,
+    # Set delete to "" if you do not want to drop the table first
+    delete=SparkifySqlQueries.time_table_drop,
     dag=dag
 )
 
